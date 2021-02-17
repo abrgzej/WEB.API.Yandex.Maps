@@ -16,9 +16,14 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.setWindowTitle('Карты')
 
         self.z = 5
+        self.type_map = "map"
         print("Введите координаты :")
         self.x, self.y = map(str, input().split())  # 37.530887 55.703118
         self.api_server = "http://static-maps.yandex.ru/1.x/"
+
+        self.btn_map.clicked.connect(self.select_map_type)
+        self.btn_gbr.clicked.connect(self.select_gbr_type)
+        self.btn_sput.clicked.connect(self.select_sput_type)
 
 
         self.map_file = "map.png"
@@ -30,7 +35,7 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             "ll": self.x + "," + self.y,
             "z": self.z,
             "size": ",".join(SIZE),
-            "l": "map"
+            "l": self.type_map
         }
         response = requests.get(self.api_server, params)
 
@@ -46,6 +51,24 @@ class MyWidget(QMainWindow, Ui_MainWindow):
     def initUI(self):
         self.pixmap = QPixmap(self.map_file)
         self.lbl_image.setPixmap(self.pixmap)
+
+    def select_map_type(self):
+        self.type_map = "map"
+        self.getImage()
+        self.initUI()
+        self.setFocus()
+
+    def select_gbr_type(self):
+        self.type_map = "sat,skl"
+        self.getImage()
+        self.initUI()
+        self.setFocus()
+
+    def select_sput_type(self):
+        self.type_map = "sat"
+        self.getImage()
+        self.initUI()
+        self.setFocus()
 
     def keyPressEvent(self, event):
         di = {
@@ -95,7 +118,6 @@ class MyWidget(QMainWindow, Ui_MainWindow):
                 self.x = float(self.x)
                 self.x += self.delta_x
                 self.x = str(self.x)
-        print(self.z)
         self.getImage()
         self.initUI()
 
