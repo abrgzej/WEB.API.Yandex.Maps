@@ -4,7 +4,7 @@ import os
 import requests
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow
-
+from PyQt5.QtCore import Qt
 from gui.ui_main import Ui_MainWindow
 
 SIZE = ["650", "450"]
@@ -15,16 +15,20 @@ class MyWidget(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle('Карты')
 
+        self.z = 5
+        print("Введите координаты :")
         self.x, self.y = map(str, input().split())  # 37.530887 55.703118
         self.api_server = "http://static-maps.yandex.ru/1.x/"
 
+
+        self.map_file = "map.png"
         self.getImage()
         self.initUI()
 
     def getImage(self):
         params = {
             "ll": self.x + "," + self.y,
-            "spn": "0.002,0.002",
+            "z": self.z,
             "size": ",".join(SIZE),
             "l": "map"
         }
@@ -36,14 +40,22 @@ class MyWidget(QMainWindow, Ui_MainWindow):
             sys.exit(1)
 
         # Запишем полученное изображение в файл.
-        self.map_file = "map.png"
         with open(self.map_file, "wb") as file:
             file.write(response.content)
 
     def initUI(self):
-        #  Изображение
         self.pixmap = QPixmap(self.map_file)
         self.lbl_image.setPixmap(self.pixmap)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_PageUp:
+            if self.z != 17:
+                self.z += 1
+        if event.key() == Qt.Key_PageDown:
+            if self.z != 0:
+                self.z -= 1
+        self.getImage()
+        self.initUI()
 
     def closeEvent(self, event):
         """При закрытии формы подчищаем за собой"""
